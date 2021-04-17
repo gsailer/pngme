@@ -16,7 +16,7 @@ def encoded_ip(ip: str) -> str:
 
 
 def get_encoded_ip(websocket: WebSocket) -> str:
-    client_host = websocket.client.host
+    client_host = websocket.headers.get('x-client-ip')
     return encoded_ip(client_host)
 
 
@@ -27,7 +27,7 @@ def get_user_session(session_id : str = Depends(get_encoded_ip)) -> Session:
 
 @router.get("/", response_model=List[UserView])
 async def get_session(request: Request):
-    session = sessions.get(encoded_ip(request.client.host))
+    session = sessions.get(encoded_ip(request.headers.get('x-client-ip')))
     if not session:
         return []
     return list(map(lambda client: {"client_id": client[0], **vars(client[1])}, session.active_connections.items()))
@@ -49,6 +49,6 @@ async def join(websocket: WebSocket, client_id: int, name: str = "anon", client_
     except WebSocketDisconnect:
         session.disconnect(client_id)
         if len(session.active_connections) == 0:
-            del sessions[hashlib.md5(str(websocket.client.host).encode("utf-8")).hexdigest()]
+            del sessions[get_encoded_ip(websocket)]
         else:
             await session.broadcast(Leave(user={"client_id": client_id, "client_type": client_type, "name": name}).json())
