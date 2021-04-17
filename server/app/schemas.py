@@ -35,3 +35,14 @@ class UserView(BaseModel):
     name: str
     client_type: str
 
+
+class Message(BaseModel):
+    mtype: str = Field(...)
+
+class Join(Message):
+    mtype : str = "JOIN"
+    user : UserView = Field(...)
+
+class Leave(Message):
+    mtype : str = "LEAVE"
+    user : UserView = Field(...)
