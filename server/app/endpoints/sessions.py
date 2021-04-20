@@ -39,7 +39,7 @@ async def get_sessions():
 
 
 @router.websocket("/join/{client_id}")
-async def join(websocket: WebSocket, client_id: int, name: str = "anon", client_type: str = "pinger", session: Session = Depends(get_user_session)):
+async def join(websocket: WebSocket, client_id: str, name: str = "anon", client_type: str = "pinger", session: Session = Depends(get_user_session)):
     await session.connect(websocket, client_id, name, client_type)
     await session.broadcast(Join(user={"client_id": client_id, "client_type": client_type, "name": name}).json())
     try:

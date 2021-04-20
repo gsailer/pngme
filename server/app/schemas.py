@@ -31,7 +31,7 @@ class Session(BaseModel):
         arbitrary_types_allowed = True
 
 class UserView(BaseModel):
-    client_id: int
+    client_id: str
     name: str
     client_type: str
 
