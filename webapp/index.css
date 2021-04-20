@@ -1,0 +1,23 @@
+.hidden {
+    display: none !important;
+    visibility: hidden;
+}
+
+.register {
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+    justify-content: space-between;
+}
+
+.register-box {
+    background-color: gainsboro;
+    margin: 20vw;
+    min-height: 30vh;
+    min-width: 30vw;
+}
+
+.spinner {
+    display: grid;
+    place-items: center;
+}
