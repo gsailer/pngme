@@ -12,30 +12,61 @@ function joinHandler() {
 
   socket = new WebSocket(`${WSS_ENDPOINT}/${createUUID()}?name=${name}`);
   socket.onmessage = function (event) {
-    const msg = JSON.parse(event.data);
-    handleMessage(msg);
+    try {
+      const msg = JSON.parse(event.data);
+      handleMessage(msg);
+    } catch {
+      console.error("Invalid json from websocket.");
+      return;
+    }
   }
   
   fetch(`${API_ENDPOINT}/sessions/`).then(function (response) {
     return response.json();
   }).then(function (data) {
     console.log(data);
+    // data :: List[User]
+    for (var i = 0; i < data.length; i++) {
+      addClientView(data[i]);
+    }
   }).catch(function (reason) {
     console.log(reason);
   });
   document.getElementsByClassName('register-box')[0].classList.add('hidden');
+  document.getElementById('main').classList.remove('hidden');
 }
 
 function handleMessage(msg) {
   switch(msg.mtype) {
     case "JOIN":
       console.log(`${msg.user.name} joined.`);
+      addClientView(msg.user);
       break;
     case "LEAVE":
       console.log(`${msg.user.name} left.`);
+      rmClientView(msg.user);
       break;
     default:
       console.log("Unknown event:", msg);
+  }
+}
+
+function addClientView(client) {
+  if (!document.getElementById(client.client_id)) {
+    elem = document.createElement("div");
+    elem.setAttribute("id", client.client_id);
+    elem.innerHTML = `<h6>${client.name}</h6>`;
+    container = document.getElementsByClassName('ping-container')[0];
+    container.appendChild(elem);
+  }
+}
+
+function rmClientView(client) {
+  if (document.getElementById(client.client_id)) {
+    elem = document.getElementById(client.client_id);
+    elem.parentNode.removeChild(elem);
+  } else {
+    console.error(`Client ${client.client_id} not found in document`);
   }
 }
 
