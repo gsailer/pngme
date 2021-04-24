@@ -3,6 +3,7 @@ const WSS_ENDPOINT = 'wss://pngme.azurewebsites.net/sessions/join';
 
 var socket = null;
 var me = null;
+var socketClosed = true;
 
 async function joinHandler() {
   const name = document.getElementById('join-name').value;
@@ -15,6 +16,12 @@ async function joinHandler() {
   await new Promise(resolve => setTimeout(resolve, 1000));
   me = {"client_id": createUUID(), "name": name, "client_type": "pinger"}
   socket = new WebSocket(`${WSS_ENDPOINT}/${me.client_id}?name=${me.name}`);
+  socket.onopen = function (_) {
+    socketClosed = false;
+  }
+  socket.onclose = function (_) {
+    socketClosed = true;
+  }
   socket.onmessage = function (event) {
     var msg = null;
     try {
@@ -42,6 +49,10 @@ async function joinHandler() {
 }
 
 function sendPing(user) {
+  if (socketClosed) {
+    console.log('Can not ping right now.');
+    return;
+  }
   console.log(`Sending ping to ${user.name}`);
   msg = {
     "mtype": "PING",
@@ -86,11 +97,20 @@ function handlePong(msg) {
 function addClientView(client) {
   if (!document.getElementById(client.client_id)) {
     if (client.client_id === me.client_id) return;
-    elem = document.createElement("div");
-    elem.setAttribute("id", client.client_id);
-    elem.innerHTML = `<h6>${client.name}</h6>`;
-    elem.onclick = function () {sendPing(client)};
-    container = document.getElementsByClassName('ping-container')[0];
+    elem = document.createElement('div');
+    elem.classList.add('user-card');
+    elem.setAttribute('id', client.client_id);
+    elem.innerHTML = `
+    <div class="card-media">
+    </div>
+    <div class="card-title">
+        <h3>${client.name}</h3>
+    </div>
+    <div class="card-actions">
+        <button onclick="${sendPing(client)}">Ping</button>
+    </div>
+    `;
+    container = document.getElementsByClassName('users')[0];
     container.appendChild(elem);
   }
 }
