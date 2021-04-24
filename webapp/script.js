@@ -4,7 +4,7 @@ const WSS_ENDPOINT = "wss://pngme.azurewebsites.net/sessions/join";
 var socket = null;
 var me = null;
 var socketClosed = true;
-
+var clients = {};
 
 async function joinHandler() {
   const name = document.getElementById("join-name").value;
@@ -80,6 +80,11 @@ function handleMessage(msg) {
       break;
     case "PING":
       if (msg.sender == me.client_id) return;
+      if (msg.recipient == me.client_id) {
+        const client_name = clients[msg.sender].name;
+        console.log(client_name);
+        alert(`${client_name} wants to know if you're available.`);
+      }
       break;
     case "PONG":
       if (msg.sender == me.client_id) return;
@@ -101,6 +106,9 @@ function handlePong(msg) {
 function addClientView(client) {
   if (!document.getElementById(client.client_id)) {
     if (client.client_id === me.client_id) return;
+    if (!clients[client.client_id]) {
+      clients[client.client_id] = client;
+    }
     elem = document.createElement("div");
     elem.classList.add("user-card");
     elem.setAttribute("id", client.client_id);
@@ -111,11 +119,12 @@ function addClientView(client) {
         <h3>${client.name}</h3>
     </div>
     <div class="card-actions">
-        <button onclick="${sendPing(client)}">Ping</button>
+        <button id='btn-${client.client_id}'>Ping</button>
     </div>
     `;
-    container = document.getElementsByClassName('users')[0];
+    container = document.getElementsByClassName("users")[0];
     container.appendChild(elem);
+    document.getElementById(`btn-${client.client_id}`).onclick = () => sendPing(client);
   }
 }
 
