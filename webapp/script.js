@@ -81,23 +81,38 @@ function sendPing(user) {
   document.getElementById(user.client_id).classList.add("pinging");
 }
 
+function sendPong(user, status) {
+  if (socketClosed) {
+    console.log("Can not pong right now.");
+    return;
+  }
+  console.log(`Sending pong to ${user.name}`);
+  msg = {
+    mtype: "PONG",
+    sender: me.client_id,
+    recipient: user.client_id,
+    status: status,
+  };
+  socket.send(JSON.stringify(msg));
+}
+
 function handleMessage(msg) {
   switch (msg.mtype) {
     case "JOIN":
-      if (msg.user.client_id == me.client_id) return;
+      if (msg.user.client_id === me.client_id) return;
       console.log(`${msg.user.name} joined.`);
       addClientView(msg.user);
       break;
     case "LEAVE":
-      if (msg.user.client_id == me.client_id) return;
+      if (msg.user.client_id === me.client_id) return;
       console.log(`${msg.user.name} left.`);
       rmClientView(msg.user);
       break;
     case "PING":
-      if (msg.sender == me.client_id) return;
-      if (msg.recipient == me.client_id) {
-        const client_name = clients[msg.sender].name;
-        alert(`${client_name} wants to know if you're available.`);
+      if (msg.sender === me.client_id) return;
+      if (msg.recipient === me.client_id) {
+        const client = clients[msg.sender];
+        renderNotification(client);
       }
       break;
     case "PONG":
@@ -112,17 +127,57 @@ function handleMessage(msg) {
 function handlePong(msg) {
   if (msg.recipient === me.client_id) {
     console.log(`Client ${msg.sender} reacted with ${msg.status}`);
-  } else {
     const sender = document.getElementById(msg.sender);
     sender.classList.remove("pinging");
     if (msg.status === "accept") {
+      if (sender.classList.contains("declined")) {
+        sender.classList.remove("declined");
+      }
       sender.classList.add("accepted");
     } else if (msg.status == "decline") {
+      if (sender.classList.contains("accepted")) {
+        sender.classList.remove("accepted");
+      }
       sender.classList.add("declined");
     }
     document.getElementById(`btn-${msg.sender}`).disabled = false;
     console.log(`Client ${msg.sender} ponged`);
   }
+}
+
+function handleResponse(client, status) {
+  if (status === "accept") {
+    sendPong(client, "accept");
+  } else if (status === "decline") {
+    sendPong(client, "decline");
+  }
+  if (document.getElementById(`notification-${client.client_id}`)) {
+    elem = document.getElementById(`notification-${client.client_id}`);
+    elem.parentNode.removeChild(elem);
+  } else {
+    console.log(`Client ${client.client_id} not found in document`);
+  }
+}
+
+function renderNotification(client) {
+  elem = document.createElement("div");
+  elem.classList.add("notification-card");
+  elem.setAttribute("id", `notification-${client.client_id}`);
+  elem.innerHTML = `
+  <div class="card-title">
+    <h3>${client.name}</h3>
+  </div>
+  <div class="notify-card-actions">
+    <button id='btn-pong-accept-${client.client_id}'>Accept</button>
+    <button id='btn-pong-decline-${client.client_id}'>Decline</button>
+  </div>
+  `;
+  container = document.getElementsByClassName("notifications")[0];
+  container.appendChild(elem);
+  const acceptBtn = document.getElementById(`btn-pong-accept-${client.client_id}`);
+  const declineBtn = document.getElementById(`btn-pong-decline-${client.client_id}`);
+  acceptBtn.onclick = () => handleResponse(client, "accept");
+  declineBtn.onclick = () => handleResponse(client, "decline");
 }
 
 function addClientView(client) {
@@ -141,7 +196,7 @@ function addClientView(client) {
         <h3>${client.name}</h3>
     </div>
     <div class="card-actions">
-        <button id='btn-${client.client_id}'>Ping</button>
+        <button id='btn-${client.client_id}'>Check</button>
     </div>
     `;
     container = document.getElementsByClassName("users")[0];
