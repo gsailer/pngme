@@ -78,6 +78,7 @@ function sendPing(user) {
     recipient: user.client_id,
   };
   socket.send(JSON.stringify(msg));
+  document.getElementById(user.client_id).classList.add("pinging");
 }
 
 function handleMessage(msg) {
@@ -96,7 +97,6 @@ function handleMessage(msg) {
       if (msg.sender == me.client_id) return;
       if (msg.recipient == me.client_id) {
         const client_name = clients[msg.sender].name;
-        console.log(client_name);
         alert(`${client_name} wants to know if you're available.`);
       }
       break;
@@ -113,6 +113,14 @@ function handlePong(msg) {
   if (msg.recipient === me.client_id) {
     console.log(`Client ${msg.sender} reacted with ${msg.status}`);
   } else {
+    const sender = document.getElementById(msg.sender);
+    sender.classList.remove("pinging");
+    if (msg.status === "accept") {
+      sender.classList.add("accepted");
+    } else if (msg.status == "decline") {
+      sender.classList.add("declined");
+    }
+    document.getElementById(`btn-${msg.sender}`).disabled = false;
     console.log(`Client ${msg.sender} ponged`);
   }
 }
@@ -138,9 +146,13 @@ function addClientView(client) {
     `;
     container = document.getElementsByClassName("users")[0];
     container.appendChild(elem);
-    document.getElementById(`btn-${client.client_id}`).onclick = () => sendPing(client);
+    const btn = document.getElementById(`btn-${client.client_id}`);
+    btn.onclick = () => {
+      sendPing(client);
+      btn.disabled = true;
+    };
   } else {
-    console.log('Client ID collision');
+    console.log("Client ID collision");
   }
 }
 
@@ -149,7 +161,7 @@ function rmClientView(client) {
     elem = document.getElementById(client.client_id);
     elem.parentNode.removeChild(elem);
   } else {
-    console.error(`Client ${client.client_id} not found in document`);
+    console.log(`Client ${client.client_id} not found in document`);
   }
 }
 
@@ -169,11 +181,10 @@ function createUUID() {
   return uuid;
 }
 
-lifecycle.addEventListener('statechange', function(event) {
-  console.log(event.oldState, event.newState);
+lifecycle.addEventListener("statechange", function (event) {
   if (event.newState === "active") {
-    openSocket();
+    if (!socket) openSocket();
   } else {
-    closeSocket();
+    if (socket) closeSocket();
   }
 });
