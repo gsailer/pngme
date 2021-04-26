@@ -6,16 +6,7 @@ var me = null;
 var socketClosed = true;
 var clients = {};
 
-async function joinHandler() {
-  const name = document.getElementById("join-name").value;
-  if (name === "") {
-    alert("Please supply a name");
-    return;
-  }
-  document.getElementById("register").classList.add("hidden");
-  document.getElementById("joining").classList.remove("hidden");
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  me = { client_id: createUUID(), name: name, client_type: "pinger" };
+function openSocket() {
   socket = new WebSocket(`${WSS_ENDPOINT}/${me.client_id}?name=${me.name}`);
   socket.onopen = function (_) {
     socketClosed = false;
@@ -48,6 +39,29 @@ async function joinHandler() {
     .catch(function (reason) {
       console.log(reason);
     });
+}
+
+function closeSocket() {
+  // clean up clients
+  for (const client_id in clients) {
+    rmClientView(clients[client_id]);
+  }
+  clients = {};
+  socket.close();
+  socket = null;
+}
+
+async function joinHandler() {
+  const name = document.getElementById("join-name").value;
+  if (name === "") {
+    alert("Please supply a name");
+    return;
+  }
+  document.getElementById("register").classList.add("hidden");
+  document.getElementById("joining").classList.remove("hidden");
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  me = { client_id: createUUID(), name: name, client_type: "pinger" };
+  openSocket();
   document.getElementsByClassName("register-box")[0].classList.add("hidden");
   document.getElementById("main").classList.remove("hidden");
 }
@@ -125,6 +139,8 @@ function addClientView(client) {
     container = document.getElementsByClassName("users")[0];
     container.appendChild(elem);
     document.getElementById(`btn-${client.client_id}`).onclick = () => sendPing(client);
+  } else {
+    console.log('Client ID collision');
   }
 }
 
@@ -152,3 +168,12 @@ function createUUID() {
 
   return uuid;
 }
+
+lifecycle.addEventListener('statechange', function(event) {
+  console.log(event.oldState, event.newState);
+  if (event.newState === "active") {
+    openSocket();
+  } else {
+    closeSocket();
+  }
+});
