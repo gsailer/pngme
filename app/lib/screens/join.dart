@@ -1,6 +1,20 @@
 import 'package:flutter/material.dart';
 
-class JoinSession extends StatelessWidget {
+class JoinSession extends StatefulWidget {
+  @override
+  JoinState createState() => JoinState();
+}
+
+class JoinState extends State<JoinSession> {
+  final textController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    textController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,12 +30,16 @@ class JoinSession extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text("Please enter your name to connect to the local session."),
-                TextField(),
+                TextField(
+                  controller: textController,
+                  autofocus: true,
+                ),
               ],
             ),
             Center(
               child: ElevatedButton(
-                onPressed: () => null,
+                onPressed: () =>
+                    Navigator.of(context).pushReplacementNamed('/session'),
                 child: Text("Join"),
               ),
             ),

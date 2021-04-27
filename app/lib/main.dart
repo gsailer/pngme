@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import './screens/initial.dart';
 import './screens/gestures.dart';
 import './screens/join.dart';
+import './screens/session.dart';
 
 void main() {
   runApp(MyApp());
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => InitialScreen(),
         '/gestures': (context) => GestureRecording(),
         '/join': (context) => JoinSession(),
+        '/session': (context) => SessionScreen(),
       },
     );
   }

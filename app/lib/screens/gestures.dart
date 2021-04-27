@@ -1,8 +1,22 @@
 import 'package:flutter/material.dart';
 
 class GestureRecording extends StatelessWidget {
-  void _recordGesture(String type) {
+  Future<void> _recordGesture(String type, BuildContext context) async {
     print("Recording $type");
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) => SimpleDialog(
+        title: const Text("Recording..."),
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+            child: ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text("Done")),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -30,7 +44,7 @@ class GestureRecording extends StatelessWidget {
               children: [
                 Text("Currently not set"),
                 TextButton(
-                  onPressed: () => _recordGesture("accept"),
+                  onPressed: () => _recordGesture("accept", context),
                   child: Text("Record"),
                 ),
               ],
@@ -54,7 +68,7 @@ class GestureRecording extends StatelessWidget {
               children: [
                 Text("Currently not set"),
                 TextButton(
-                  onPressed: () => _recordGesture("decline"),
+                  onPressed: () => _recordGesture("decline", context),
                   child: Text("Record"),
                 ),
               ],
