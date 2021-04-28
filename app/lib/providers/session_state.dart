@@ -21,9 +21,11 @@ class SessionState extends ChangeNotifier {
   }
 
   void closeChannel() {
-    channel.sink.close();
-    channel = null;
-    notifyListeners();
+    if (channel != null) {
+      channel.sink.close();
+      channel = null;
+      notifyListeners();
+    }
   }
 
   void changeConnectionAttributes() {

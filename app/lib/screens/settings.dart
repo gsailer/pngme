@@ -1,5 +1,5 @@
+import 'package:app/providers/earable.dart';
 import 'package:app/providers/session_state.dart';
-import 'package:app/widgets/pong.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -9,7 +9,9 @@ class SettingsPage extends StatefulWidget {
 }
 
 class SettingsState extends State<SettingsPage> {
-  final _textController = TextEditingController();
+  final _tcName = TextEditingController();
+  final _tcEarable = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,9 +25,29 @@ class SettingsState extends State<SettingsPage> {
                 SizedBox(width: 16),
                 Expanded(
                   child: TextField(
-                    controller: _textController,
+                    controller: _tcName,
                     decoration: InputDecoration(
                         hintText: Provider.of<SessionState>(context).me.name),
+                  ),
+                )
+              ],
+            ),
+          ),
+          Divider(
+            color: Colors.black,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Text("Earable ID",
+                    style: Theme.of(context).textTheme.bodyText1),
+                SizedBox(width: 16),
+                Expanded(
+                  child: TextField(
+                    controller: _tcEarable,
+                    decoration: InputDecoration(
+                        hintText: Provider.of<EarableState>(context).name),
                   ),
                 )
               ],
@@ -47,8 +69,14 @@ class SettingsState extends State<SettingsPage> {
             child: ElevatedButton(
                 child: Text("Save"),
                 onPressed: () {
-                  Provider.of<SessionState>(context, listen: false)
-                      .changeName(_textController.text);
+                  if (_tcName.text != "") {
+                    Provider.of<SessionState>(context, listen: false)
+                        .changeName(_tcName.text);
+                  }
+                  if (_tcEarable.text != "") {
+                    Provider.of<EarableState>(context, listen: false)
+                        .changeEarable(_tcEarable.text);
+                  }
                 }),
           )
         ],

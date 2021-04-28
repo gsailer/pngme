@@ -30,7 +30,6 @@ Future<List<User>> getCurrentUsers() async {
   if (response.statusCode == 200) {
     // If the server did return a 200 OK response,
     // then parse the JSON.
-    print(response.body);
     return jsonDecode(response.body).isEmpty
         ? <User>[]
         : jsonDecode(response.body)

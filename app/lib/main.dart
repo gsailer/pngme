@@ -1,3 +1,4 @@
+import 'package:app/providers/earable.dart';
 import 'package:app/providers/session_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +18,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => SessionState()),
+        ChangeNotifierProvider(create: (context) => EarableState())
       ],
       child: MaterialApp(
         title: 'pngme.',
