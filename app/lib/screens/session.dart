@@ -11,7 +11,7 @@ class SessionScreen extends StatefulWidget {
 class UserState extends State<SessionScreen> {
   int _selectedIndex = 0;
 
-  static List<Widget> _widgetOptions = <Widget>[UsersPage(), SettingsPage()];
+  static List<Widget> _widgetOptions = <Widget>[UserPage(), SettingsPage()];
 
   void _onItemTapped(int index) {
     setState(() {

@@ -1,4 +1,6 @@
+import 'package:app/providers/session_state.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class JoinSession extends StatefulWidget {
   @override
@@ -38,8 +40,14 @@ class JoinState extends State<JoinSession> {
             ),
             Center(
               child: ElevatedButton(
-                onPressed: () =>
-                    Navigator.of(context).pushReplacementNamed('/session'),
+                onPressed: () {
+                  SessionState state =
+                      Provider.of<SessionState>(context, listen: false);
+                  state.changeName(textController.text);
+                  state.updateUsers();
+                  state.openChannel();
+                  Navigator.of(context).pushReplacementNamed('/session');
+                },
                 child: Text("Join"),
               ),
             ),

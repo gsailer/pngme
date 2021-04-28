@@ -1,5 +1,7 @@
+import 'package:app/providers/session_state.dart';
 import 'package:app/widgets/pong.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -7,7 +9,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class SettingsState extends State<SettingsPage> {
-  final _textController = TextEditingController(text: "Current Name");
+  final _textController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,6 +24,8 @@ class SettingsState extends State<SettingsPage> {
                 Expanded(
                   child: TextField(
                     controller: _textController,
+                    decoration: InputDecoration(
+                        hintText: Provider.of<SessionState>(context).me.name),
                   ),
                 )
               ],
@@ -41,12 +45,11 @@ class SettingsState extends State<SettingsPage> {
           Align(
             alignment: Alignment.bottomCenter,
             child: ElevatedButton(
-              child: Text("Save"),
-              onPressed: () => showDialog(
-                builder: (context) => Pong(name: "Bob", id: "1337"),
-                context: context,
-              ),
-            ),
+                child: Text("Save"),
+                onPressed: () {
+                  Provider.of<SessionState>(context, listen: false)
+                      .changeName(_textController.text);
+                }),
           )
         ],
       ),
