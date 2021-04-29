@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:esense_flutter/esense.dart';
 import 'package:flutter/foundation.dart';
+import 'package:stats/stats.dart';
 
 class EarableState extends ChangeNotifier {
   static const SAMPLING_RATE = 30;
@@ -96,13 +97,44 @@ class EarableState extends ChangeNotifier {
                 SAMPLING_RATE)
             .round();
     startListenToSensorEvents(recording: false);
-    await Future.delayed(Duration(seconds: 3 + recordingDuration), () {
+    String status =
+        await Future.delayed(Duration(seconds: 3 + recordingDuration), () {
       pauseListenToSensorEvents();
       print(_localRecording["x"].length);
-      // evaluate recorded data against
-      _localRecording = {"x": [], "y": [], "z": []};
+      // evaluate recorded data against measurement
+      return _compareToRegistredGestures();
     });
-    return Future.value("accept");
+    _localRecording = {"x": [], "y": [], "z": []};
+    return Future.value(status);
+  }
+
+  double distance(Map<String, Stats> a, Map<String, Stats> b) {
+    List<double> distances = [];
+    for (var axis in ["x", "y", "z"]) {
+      distances.add((a[axis].average - b[axis].average).abs());
+      distances
+          .add((a[axis].standardDeviation - b[axis].standardDeviation).abs());
+    }
+    return distances.sum;
+  }
+
+  String _compareToRegistredGestures() {
+    Map<String, Stats> acceptStatistics = {};
+    Map<String, Stats> declineStatistics = {};
+    Map<String, Stats> measuredStatistics = {};
+
+    for (var axis in ["x", "y", "z"]) {
+      acceptStatistics[axis] = Stats.fromData(acceptGesture[axis]);
+      declineStatistics[axis] = Stats.fromData(declineGesture[axis]);
+      measuredStatistics[axis] = Stats.fromData(_localRecording[axis]);
+    }
+    double distanceAccept = distance(acceptStatistics, measuredStatistics);
+    double distanceDecline = distance(declineStatistics, measuredStatistics);
+
+    print(
+        "Evaluated distance accept $distanceAccept and decline $distanceDecline");
+
+    return distanceAccept >= distanceDecline ? "decline" : "accept";
   }
 
   void startListenToSensorEvents({bool recording, String gesture}) async {
