@@ -6,7 +6,7 @@ class GestureRecording extends StatelessWidget {
   Future<void> _recordGesture(String type, BuildContext context) async {
     print("Recording $type");
     Provider.of<EarableState>(context, listen: false)
-        .startListenToSensorEvents();
+        .startListenToSensorEvents(recording: true, gesture: type);
     await showDialog(
       context: context,
       builder: (BuildContext context) => SimpleDialog(
@@ -29,14 +29,13 @@ class GestureRecording extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    EarableState earableState = Provider.of<EarableState>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text("Record Gestures"),
       ),
       body: Column(
         children: [
-          Text(Provider.of<EarableState>(context).connected.toString()),
-          Text(Provider.of<EarableState>(context).deviceStatus),
           Padding(
             padding: EdgeInsets.all(16.0),
             child: Align(
@@ -52,7 +51,9 @@ class GestureRecording extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Currently not set"),
+                Text(earableState.acceptGesture["x"].isNotEmpty
+                    ? "Recorded"
+                    : "Currently not set"),
                 TextButton(
                   onPressed: () => _recordGesture("accept", context),
                   child: Text("Record"),
@@ -76,7 +77,9 @@ class GestureRecording extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Currently not set"),
+                Text(earableState.declineGesture["x"].isNotEmpty
+                    ? "Recorded"
+                    : "Currently not set"),
                 TextButton(
                   onPressed: () => _recordGesture("decline", context),
                   child: Text("Record"),

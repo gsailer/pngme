@@ -12,6 +12,10 @@ class EarableState extends ChangeNotifier {
   String _event = '';
   String _button = 'not pressed';
   bool connected = false;
+  AccelerometerOffsetRead _accelerometerOffsetRead;
+
+  Map<String, List<int>> acceptGesture = {"x": [], "y": [], "z": []};
+  Map<String, List<int>> declineGesture = {"x": [], "y": [], "z": []};
 
   Future listenToESense() async {
     // if you want to get the connection events when connecting,
@@ -41,6 +45,7 @@ class EarableState extends ChangeNotifier {
           deviceStatus = 'device_not_found';
           break;
       }
+      notifyListeners();
     });
   }
 
@@ -49,6 +54,7 @@ class EarableState extends ChangeNotifier {
     if (!connected) connected = await ESenseManager().connect(name);
 
     deviceStatus = connected ? 'connecting' : 'connection failed';
+    notifyListeners();
   }
 
   void _listenToESenseEvents() async {
@@ -67,7 +73,7 @@ class EarableState extends ChangeNotifier {
               (event as ButtonEventChanged).pressed ? 'pressed' : 'not pressed';
           break;
         case AccelerometerOffsetRead:
-          // TODO
+          _accelerometerOffsetRead = (event as AccelerometerOffsetRead);
           break;
         case AdvertisementAndConnectionIntervalRead:
           // TODO
@@ -76,6 +82,7 @@ class EarableState extends ChangeNotifier {
           // TODO
           break;
       }
+      notifyListeners();
     });
 
     _getESenseProperties();
@@ -102,21 +109,37 @@ class EarableState extends ChangeNotifier {
             await ESenseManager().getAdvertisementAndConnectionInterval());
     Timer(Duration(seconds: 5),
         () async => await ESenseManager().getSensorConfig());
+    notifyListeners();
   }
 
   StreamSubscription subscription;
-  void startListenToSensorEvents() async {
+
+  void startListenToSensorEvents({bool recording, String gesture}) async {
     // subscribe to sensor event from the eSense device
     subscription = ESenseManager().sensorEvents.listen((event) {
-      print('SENSOR event: $event');
-      _event = event.toString();
+      if (recording) {
+        var destination;
+        if (gesture == "accept") {
+          destination = acceptGesture;
+        } else if (gesture == "decline") {
+          destination = declineGesture;
+        }
+        destination["x"].add(event.gyro[0]);
+        destination["y"].add(event.gyro[1]);
+        destination["z"].add(event.gyro[2]);
+      } else {
+        print('SENSOR event: $event');
+        _event = event.toString();
+      }
     });
     sampling = true;
+    notifyListeners();
   }
 
   void pauseListenToSensorEvents() async {
     subscription.cancel();
     sampling = false;
+    notifyListeners();
   }
 
   void changeEarable(String name) {

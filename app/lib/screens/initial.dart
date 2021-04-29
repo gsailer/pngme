@@ -26,11 +26,14 @@ class InitialScreen extends StatelessWidget {
             SizedBox(height: 16.0),
             TextButton(
               onPressed: () async {
-                Provider.of<EarableState>(context, listen: false)
-                    .listenToESense();
-                await Provider.of<EarableState>(context, listen: false)
-                    .connectToESense();
-                Navigator.of(context).pushReplacementNamed('/gestures');
+                EarableState earableState =
+                    Provider.of<EarableState>(context, listen: false);
+                earableState.listenToESense();
+                await earableState.connectToESense();
+                if (earableState.deviceStatus != "device_not_found") {
+                  Navigator.of(context).pushReplacementNamed('/gestures');
+                }
+                ;
               },
               child: Text("Connect"),
             ),
