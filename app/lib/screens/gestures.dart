@@ -1,4 +1,5 @@
 import 'package:app/providers/earable.dart';
+import 'package:app/providers/session_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -89,8 +90,15 @@ class GestureRecording extends StatelessWidget {
           ),
           SizedBox(height: 16.0),
           TextButton(
-            onPressed: () =>
-                Navigator.of(context).pushReplacementNamed('/join'),
+            onPressed: () {
+              if (!Provider.of<SessionState>(context).onboarded) {
+                Navigator.of(context).pushReplacementNamed('/join');
+                Provider.of<SessionState>(context, listen: false)
+                    .setOnboarded(true);
+              } else {
+                Navigator.of(context).pop();
+              }
+            },
             child: Text("Done"),
           ),
         ],

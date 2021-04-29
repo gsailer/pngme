@@ -16,8 +16,15 @@ class SessionState extends ChangeNotifier {
   bool requiresPong = false;
   String toPong = "";
 
+  bool onboarded = false;
+
   // state for session screen
   int selectedIndex = 0;
+
+  void setOnboarded(bool onboarded) {
+    this.onboarded = onboarded;
+    notifyListeners();
+  }
 
   void setIndex(int index) {
     selectedIndex = index;

@@ -100,7 +100,6 @@ class EarableState extends ChangeNotifier {
     String status =
         await Future.delayed(Duration(seconds: 3 + recordingDuration), () {
       pauseListenToSensorEvents();
-      print(_localRecording["x"].length);
       // evaluate recorded data against measurement
       return _compareToRegistredGestures();
     });

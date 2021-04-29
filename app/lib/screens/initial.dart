@@ -18,7 +18,7 @@ class InitialScreen extends StatelessWidget {
               child: Align(
                 alignment: Alignment.center,
                 child: Text(
-                  "Make sure the Earables are paired in the system settings to receive sound on your Earables.",
+                  "If you want to be notified on the Earables, make sure they are paired in the Bluetooth system settings.",
                   style: Theme.of(context).textTheme.bodyText1,
                 ),
               ),
@@ -31,7 +31,7 @@ class InitialScreen extends StatelessWidget {
                 earableState.listenToESense();
                 await earableState.connectToESense();
                 if (earableState.deviceStatus != "device_not_found") {
-                  Navigator.of(context).pushReplacementNamed('/gestures');
+                  Navigator.of(context).pushNamed('/gestures');
                 }
               },
               child: Text("Connect"),
