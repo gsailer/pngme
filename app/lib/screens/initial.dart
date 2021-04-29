@@ -1,4 +1,6 @@
+import 'package:app/providers/earable.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class InitialScreen extends StatelessWidget {
   @override
@@ -23,9 +25,14 @@ class InitialScreen extends StatelessWidget {
             ),
             SizedBox(height: 16.0),
             TextButton(
-              onPressed: () =>
-                  Navigator.of(context).pushReplacementNamed('/gestures'),
-              child: Text("Done"),
+              onPressed: () async {
+                Provider.of<EarableState>(context, listen: false)
+                    .listenToESense();
+                await Provider.of<EarableState>(context, listen: false)
+                    .connectToESense();
+                Navigator.of(context).pushReplacementNamed('/gestures');
+              },
+              child: Text("Connect"),
             ),
           ],
         ),
