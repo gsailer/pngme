@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:audioplayers/audio_cache.dart';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
@@ -16,12 +18,14 @@ class SessionState extends ChangeNotifier {
     if (channel == null) {
       final url = "$WS_ENDPOINT/${me.id}?name=${me.name}&client_type=ponger";
       channel = IOWebSocketChannel.connect(url);
+      listenForPing();
       notifyListeners();
     }
   }
 
   void closeChannel() {
     if (channel != null) {
+      subscription.cancel();
       channel.sink.close();
       channel = null;
       notifyListeners();
@@ -33,11 +37,30 @@ class SessionState extends ChangeNotifier {
     openChannel();
   }
 
-  void sendPong(User recipient, String status) {
+  StreamSubscription subscription;
+
+  Future<void> listenForPing() async {
+    subscription = channel.stream.listen((event) async {
+      var data = jsonDecode(event);
+      if (data["mtype"] == "PING" && data["recipient"] == me.id) {
+        AudioCache player = AudioCache();
+        player.play("knock.mp3");
+        print("Played knock");
+        var response = _listenForGesture();
+        sendPong(data["sender"], response);
+      }
+    });
+  }
+
+  String _listenForGesture() {
+    return "accept";
+  }
+
+  void sendPong(String recipientId, String status) {
     Map<String, dynamic> message = {
       "mtype": "PONG",
       "sender": me.id,
-      "recipient": recipient.id,
+      "recipient": recipientId,
       "status": status
     };
     channel.sink.add(jsonEncode(message));
@@ -60,6 +83,7 @@ class SessionState extends ChangeNotifier {
 
   @override
   void dispose() {
+    subscription.cancel();
     channel.sink.close();
     super.dispose();
   }

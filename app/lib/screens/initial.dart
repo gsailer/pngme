@@ -33,7 +33,6 @@ class InitialScreen extends StatelessWidget {
                 if (earableState.deviceStatus != "device_not_found") {
                   Navigator.of(context).pushReplacementNamed('/gestures');
                 }
-                ;
               },
               child: Text("Connect"),
             ),

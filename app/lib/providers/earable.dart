@@ -5,14 +5,9 @@ import 'package:flutter/foundation.dart';
 
 class EarableState extends ChangeNotifier {
   String name = "eSense-0414";
-  String _deviceName = 'Unknown';
-  double _voltage = -1;
   String deviceStatus = '';
   bool sampling = false;
-  String _event = '';
-  String _button = 'not pressed';
   bool connected = false;
-  AccelerometerOffsetRead _accelerometerOffsetRead;
 
   Map<String, List<int>> acceptGesture = {"x": [], "y": [], "z": []};
   Map<String, List<int>> declineGesture = {"x": [], "y": [], "z": []};
@@ -60,29 +55,6 @@ class EarableState extends ChangeNotifier {
   void _listenToESenseEvents() async {
     ESenseManager().eSenseEvents.listen((event) {
       print('ESENSE event: $event');
-
-      switch (event.runtimeType) {
-        case DeviceNameRead:
-          _deviceName = (event as DeviceNameRead).deviceName;
-          break;
-        case BatteryRead:
-          _voltage = (event as BatteryRead).voltage;
-          break;
-        case ButtonEventChanged:
-          _button =
-              (event as ButtonEventChanged).pressed ? 'pressed' : 'not pressed';
-          break;
-        case AccelerometerOffsetRead:
-          _accelerometerOffsetRead = (event as AccelerometerOffsetRead);
-          break;
-        case AdvertisementAndConnectionIntervalRead:
-          // TODO
-          break;
-        case SensorConfigRead:
-          // TODO
-          break;
-      }
-      notifyListeners();
     });
 
     _getESenseProperties();
@@ -129,7 +101,6 @@ class EarableState extends ChangeNotifier {
         destination["z"].add(event.gyro[2]);
       } else {
         print('SENSOR event: $event');
-        _event = event.toString();
       }
     });
     sampling = true;
@@ -137,13 +108,17 @@ class EarableState extends ChangeNotifier {
   }
 
   void pauseListenToSensorEvents() async {
-    subscription.cancel();
-    sampling = false;
+    if (sampling) {
+      subscription.cancel();
+      sampling = false;
+    }
     notifyListeners();
   }
 
-  void changeEarable(String name) {
+  Future<void> changeEarable(String name) async {
     this.name = name;
+    ESenseManager().disconnect();
+    await ESenseManager().connect(name);
     notifyListeners();
   }
 
