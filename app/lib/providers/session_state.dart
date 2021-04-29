@@ -13,6 +13,16 @@ class SessionState extends ChangeNotifier {
   WebSocketChannel channel;
   User me = User(name: "anon", id: Uuid().v4(), type: "ponger");
   List<User> users = [];
+  bool requiresPong = false;
+  String toPong = "";
+
+  // state for session screen
+  int selectedIndex = 0;
+
+  void setIndex(int index) {
+    selectedIndex = index;
+    notifyListeners();
+  }
 
   void openChannel() {
     if (channel == null) {
@@ -46,17 +56,15 @@ class SessionState extends ChangeNotifier {
         AudioCache player = AudioCache();
         player.play("knock.mp3");
         print("Played knock");
-        var response = _listenForGesture();
-        sendPong(data["sender"], response);
+        toPong = data["sender"];
+        requiresPong = true;
+        notifyListeners();
       }
     });
   }
 
-  String _listenForGesture() {
-    return "accept";
-  }
-
   void sendPong(String recipientId, String status) {
+    requiresPong = false;
     Map<String, dynamic> message = {
       "mtype": "PONG",
       "sender": me.id,
@@ -64,6 +72,7 @@ class SessionState extends ChangeNotifier {
       "status": status
     };
     channel.sink.add(jsonEncode(message));
+    notifyListeners();
   }
 
   void updateUsers() async {

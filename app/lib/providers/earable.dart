@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:esense_flutter/esense.dart';
 import 'package:flutter/foundation.dart';
 
 class EarableState extends ChangeNotifier {
+  static const SAMPLING_RATE = 30;
   String name = "eSense-0414";
   String deviceStatus = '';
   bool sampling = false;
@@ -11,6 +13,8 @@ class EarableState extends ChangeNotifier {
 
   Map<String, List<int>> acceptGesture = {"x": [], "y": [], "z": []};
   Map<String, List<int>> declineGesture = {"x": [], "y": [], "z": []};
+
+  Map<String, List<int>> _localRecording = {"x": [], "y": [], "z": []};
 
   Future listenToESense() async {
     // if you want to get the connection events when connecting,
@@ -86,7 +90,23 @@ class EarableState extends ChangeNotifier {
 
   StreamSubscription subscription;
 
+  Future<String> classifyGesture() async {
+    int recordingDuration =
+        (max(acceptGesture["x"].length, declineGesture["x"].length) /
+                SAMPLING_RATE)
+            .round();
+    startListenToSensorEvents(recording: false);
+    await Future.delayed(Duration(seconds: 3 + recordingDuration), () {
+      pauseListenToSensorEvents();
+      print(_localRecording["x"].length);
+      // evaluate recorded data against
+      _localRecording = {"x": [], "y": [], "z": []};
+    });
+    return Future.value("accept");
+  }
+
   void startListenToSensorEvents({bool recording, String gesture}) async {
+    await ESenseManager().setSamplingRate(SAMPLING_RATE);
     // subscribe to sensor event from the eSense device
     subscription = ESenseManager().sensorEvents.listen((event) {
       if (recording) {
@@ -100,11 +120,13 @@ class EarableState extends ChangeNotifier {
         destination["y"].add(event.gyro[1]);
         destination["z"].add(event.gyro[2]);
       } else {
-        print('SENSOR event: $event');
+        // do local recording
+        _localRecording["x"].add(event.gyro[0]);
+        _localRecording["y"].add(event.gyro[1]);
+        _localRecording["z"].add(event.gyro[2]);
       }
     });
     sampling = true;
-    notifyListeners();
   }
 
   void pauseListenToSensorEvents() async {
