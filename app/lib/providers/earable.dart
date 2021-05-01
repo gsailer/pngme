@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:esense_flutter/esense.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:stats/stats.dart';
 
 class EarableState extends ChangeNotifier {
@@ -86,6 +87,13 @@ class EarableState extends ChangeNotifier {
             await ESenseManager().getAdvertisementAndConnectionInterval());
     Timer(Duration(seconds: 5),
         () async => await ESenseManager().getSensorConfig());
+    Timer(Duration(seconds: 6), () async {
+        try {
+            await ESenseManager().setSamplingRate(SAMPLING_RATE);
+        } on PlatformException catch (e) {
+            print("Sampling at 10Hz on iOS");
+        }
+    });
     notifyListeners();
   }
 
@@ -137,7 +145,6 @@ class EarableState extends ChangeNotifier {
   }
 
   void startListenToSensorEvents({bool recording, String gesture}) async {
-    await ESenseManager().setSamplingRate(SAMPLING_RATE);
     // subscribe to sensor event from the eSense device
     subscription = ESenseManager().sensorEvents.listen((event) {
       if (recording) {

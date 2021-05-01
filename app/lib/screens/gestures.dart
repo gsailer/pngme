@@ -91,13 +91,7 @@ class GestureRecording extends StatelessWidget {
           SizedBox(height: 16.0),
           TextButton(
             onPressed: () {
-              if (!Provider.of<SessionState>(context).onboarded) {
                 Navigator.of(context).pushReplacementNamed('/join');
-                Provider.of<SessionState>(context, listen: false)
-                    .setOnboarded(true);
-              } else {
-                Navigator.of(context).pop();
-              }
             },
             child: Text("Done"),
           ),
