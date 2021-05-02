@@ -88,11 +88,11 @@ class EarableState extends ChangeNotifier {
     Timer(Duration(seconds: 5),
         () async => await ESenseManager().getSensorConfig());
     Timer(Duration(seconds: 6), () async {
-        try {
-            await ESenseManager().setSamplingRate(SAMPLING_RATE);
-        } on PlatformException catch (e) {
-            print("Sampling at 10Hz on iOS");
-        }
+      try {
+        await ESenseManager().setSamplingRate(SAMPLING_RATE);
+      } on PlatformException {
+        print("Sampling at 10Hz on iOS");
+      }
     });
     notifyListeners();
   }

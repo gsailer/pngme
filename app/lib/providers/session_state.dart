@@ -97,6 +97,8 @@ class SessionState extends ChangeNotifier {
     notifyListeners();
   }
 
+  User userByID(String id) => users.where((user) => user.id == id).first;
+
   @override
   void dispose() {
     subscription.cancel();

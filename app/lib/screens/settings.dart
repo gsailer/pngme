@@ -56,6 +56,32 @@ class SettingsState extends State<SettingsPage> {
           Divider(
             color: Colors.black,
           ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text("Earable Status",
+                      style: Theme.of(context).textTheme.bodyText1),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Text(
+                      Provider.of<EarableState>(context).deviceStatus,
+                      style: Theme.of(context).textTheme.bodyText1,
+                      textAlign: TextAlign.end,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(
+            color: Colors.black,
+          ),
           ListTile(
             title: Text(
               "Reconfigure Gestures",
