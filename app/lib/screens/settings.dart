@@ -105,20 +105,23 @@ class SettingsState extends State<SettingsPage> {
                 ))
               : Container(width: 0, height: 0),
           Spacer(),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: ElevatedButton(
-                child: Text("Save"),
-                onPressed: () {
-                  if (_tcName.text != "") {
-                    Provider.of<SessionState>(context, listen: false)
-                        .changeName(_tcName.text);
-                  }
-                  if (_tcEarable.text != "") {
-                    Provider.of<EarableState>(context, listen: false)
-                        .changeEarable(_tcEarable.text);
-                  }
-                }),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: ElevatedButton(
+                  child: Text("Save"),
+                  onPressed: () {
+                    if (_tcName.text != "") {
+                      Provider.of<SessionState>(context, listen: false)
+                          .changeName(_tcName.text);
+                    }
+                    if (_tcEarable.text != "") {
+                      Provider.of<EarableState>(context, listen: false)
+                          .changeEarable(_tcEarable.text);
+                    }
+                  }),
+            ),
           ),
         ],
       ),
