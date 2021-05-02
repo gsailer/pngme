@@ -76,19 +76,34 @@ class SettingsState extends State<SettingsPage> {
                     ),
                   ),
                 ),
+                Provider.of<EarableState>(context).deviceStatus != "connected"
+                    ? IconButton(
+                        icon: Icon(Icons.replay),
+                        onPressed: () async {
+                          EarableState earableState =
+                              Provider.of<EarableState>(context, listen: false);
+                          earableState.listenToESense();
+                          await earableState.connectToESense();
+                        })
+                    : Container(width: 0, height: 0),
               ],
             ),
           ),
+          Provider.of<EarableState>(context).connecting
+              ? LinearProgressIndicator()
+              : Container(width: 0, height: 0),
           Divider(
             color: Colors.black,
           ),
-          ListTile(
-            title: Text(
-              "Reconfigure Gestures",
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
-            onTap: () => Navigator.of(context).pushNamed('/gestures'),
-          ),
+          Provider.of<EarableState>(context).deviceStatus != "Not connected"
+              ? (ListTile(
+                  title: Text(
+                    "Reconfigure Gestures",
+                    style: Theme.of(context).textTheme.subtitle1,
+                  ),
+                  onTap: () => Navigator.of(context).pushNamed('/gestures'),
+                ))
+              : Container(width: 0, height: 0),
           Spacer(),
           Align(
             alignment: Alignment.bottomCenter,
@@ -104,7 +119,7 @@ class SettingsState extends State<SettingsPage> {
                         .changeEarable(_tcEarable.text);
                   }
                 }),
-          )
+          ),
         ],
       ),
     );
