@@ -8,7 +8,13 @@ class User {
   String name;
   String type;
   String id;
+  String availability = "unknown";
+
   User({this.name, this.type, this.id});
+
+  void setAvailability(String availability) {
+    this.availability = availability;
+  }
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(

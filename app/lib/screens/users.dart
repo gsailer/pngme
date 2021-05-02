@@ -54,6 +54,15 @@ class UserPage extends StatelessWidget {
                           filteredUsers[position].id != me.id
                               ? ListTile(
                                   title: Text(filteredUsers[position].name),
+                                  trailing:
+                                      (filteredUsers[position].availability ==
+                                              "unknown")
+                                          ? Icon(Icons.help)
+                                          : ((filteredUsers[position]
+                                                      .availability ==
+                                                  "accept")
+                                              ? Icon(Icons.check)
+                                              : Icon(Icons.close)),
                                   onTap: () => showDialog(
                                       context: context,
                                       builder: (context) => PingDialog(

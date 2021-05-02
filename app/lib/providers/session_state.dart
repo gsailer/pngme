@@ -31,11 +31,17 @@ class SessionState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setUserAvailability(String uid, String availablity) {
+    User user = users.where((user) => user.id == uid).first;
+    user.setAvailability(availablity);
+    notifyListeners();
+  }
+
   void openChannel() {
     if (channel == null) {
       final url = "$WS_ENDPOINT/${me.id}?name=${me.name}&client_type=ponger";
       channel = IOWebSocketChannel.connect(url);
-      listenForPing();
+      listenForMessages();
       notifyListeners();
     }
   }
@@ -56,7 +62,7 @@ class SessionState extends ChangeNotifier {
 
   StreamSubscription subscription;
 
-  Future<void> listenForPing() async {
+  Future<void> listenForMessages() async {
     subscription = channel.stream.listen((event) async {
       var data = jsonDecode(event);
       if (data["mtype"] == "PING" && data["recipient"] == me.id) {
@@ -66,6 +72,8 @@ class SessionState extends ChangeNotifier {
         toPong = data["sender"];
         requiresPong = true;
         notifyListeners();
+      } else if (data["mtype"] == "PONG" && data["recipient"] == me.id) {
+        setUserAvailability(data["sender"], data["status"]);
       }
     });
   }
