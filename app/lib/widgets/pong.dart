@@ -12,7 +12,7 @@ class Pong extends StatelessWidget {
     SessionState sessionState =
         Provider.of<SessionState>(context, listen: false);
     return SimpleDialog(
-      title: Text("$name wants to know your availablity"),
+      title: Text("$name wants to know if you are available"),
       children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
           IconButton(
