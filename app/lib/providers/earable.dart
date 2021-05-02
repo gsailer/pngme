@@ -9,9 +9,10 @@ import 'package:stats/stats.dart';
 class EarableState extends ChangeNotifier {
   static const SAMPLING_RATE = 30;
   String name = "eSense-0414";
-  String deviceStatus = '';
+  String deviceStatus = "Not connected";
   bool sampling = false;
   bool connected = false;
+  bool connecting = false;
 
   Map<String, List<int>> acceptGesture = {"x": [], "y": [], "z": []};
   Map<String, List<int>> declineGesture = {"x": [], "y": [], "z": []};
@@ -51,10 +52,14 @@ class EarableState extends ChangeNotifier {
   }
 
   Future connectToESense() async {
-    print('connecting... connected: $connected');
+    connecting = true;
+    notifyListeners();
     if (!connected) connected = await ESenseManager().connect(name);
 
     deviceStatus = connected ? 'connecting' : 'connection failed';
+    await Future.delayed(Duration(seconds: 7), () {
+      connecting = false;
+    });
     notifyListeners();
   }
 

@@ -92,7 +92,7 @@ class GestureRecording extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).pushReplacementNamed('/join');
             },
-            child: Text("Done"),
+            child: Text("Continue to join session"),
           ),
         ],
       ),
